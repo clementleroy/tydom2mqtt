@@ -314,6 +314,7 @@ class TydomMessageHandler():
                     except Exception as e:
                         print('msg_data error in parsing !')
                         print(e)
+                        print(endpoint)
 
                     if 'device_type' in attr_cover and attr_cover['device_type'] == 'cover':
                         # print(attr_cover)
