@@ -1,6 +1,7 @@
 from cover import Cover
 from light import Light
 from boiler import Boiler
+from electricalConsumptionSensor import ElectricalConsumptionSensor
 from alarm_control_panel import Alarm
 from sensors import sensor
 
@@ -30,6 +31,8 @@ deviceCoverDetailsKeywords = ['onFavPos','thermicDefect','obstacleDefect','intru
 #climateKeywords = ['temperature', 'authorization', 'hvacMode', 'setpoint']
 
 deviceBoilerKeywords = ['thermicLevel','delayThermicLevel','temperature','authorization','hvacMode','timeDelay','tempoOn','antifrostOn','openingDetected','presenceDetected','absence','loadSheddingOn','setpoint','delaySetpoint','anticipCoeff','outTemperature']
+
+deviceConsoKeywords = ['energyInstant', 'energyDistrib', 'energyHisto', 'energyIndex']
 
 # Device dict for parsing
 device_name = dict()
@@ -217,6 +220,7 @@ class TydomMessageHandler():
                         attr_window ={}
                         attr_light = {}
                         attr_boiler = {}
+                        attr_conso = {}
                         attr_light_details = {}
                         device_id = i["id"]
                         endpoint_id = endpoint["id"]
@@ -301,6 +305,16 @@ class TydomMessageHandler():
                                     attr_boiler['device_type'] = 'climate'
                                     attr_boiler[elementName] = elementValue
 
+                            if type_of_id == 'conso':
+                                if elementName in deviceConsoKeywords and elementValidity == 'upToDate':  # NEW METHOD
+                                    attr_conso['device_id'] = device_id
+                                    attr_conso['endpoint_id'] = endpoint_id
+                                    attr_conso['id'] = str(device_id) + '_' + str(endpoint_id)
+                                    # attr_boiler['boiler_name'] = print_id
+                                    attr_conso['name'] = print_id
+                                    attr_conso['device_type'] = 'sensor'
+                                    attr_conso[elementName] = elementValue
+
                             if type_of_id == 'alarm':
                                 if elementName in deviceAlarmKeywords and elementValidity == 'upToDate':
                                     attr_alarm['device_id'] = device_id
@@ -346,6 +360,12 @@ class TydomMessageHandler():
                         new_boiler = Boiler(tydom_attributes=attr_boiler, tydom_client=self.tydom_client, mqtt=self.mqtt_client) #NEW METHOD
                         # new_cover = Cover(id=endpoint_id,name=print_id, current_position=elementValue, attributes=i, mqtt=self.mqtt_client)
                         await new_boiler.update()
+                    elif 'device_type' in attr_conso and attr_conso['device_type'] == 'conso':
+                        # print(attr_boiler)
+                        new_conso = "conso_tydom_" + str(endpoint_id)
+                        new_conso = ElectricalConsumptionSensor(tydom_attributes=attr_conso, tydom_client=self.tydom_client,
+                                            mqtt=self.mqtt_client)
+                        await new_conso.update()
                    # Get last known state (for alarm) # NEW METHOD
                     elif 'device_type' in attr_alarm and attr_alarm['device_type'] == 'alarm_control_panel':
                         # print(attr_alarm)
