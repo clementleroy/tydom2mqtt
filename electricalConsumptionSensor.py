@@ -38,7 +38,7 @@ class ElectricalConsumptionSensor:
 
 
     async def update(self):
-        await
+        await self.setup()
         self.setup()
 
         try:
