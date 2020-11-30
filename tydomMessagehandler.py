@@ -188,20 +188,20 @@ class TydomMessageHandler():
             # Get list of shutter
             # print(i)
             if i["last_usage"] == 'shutter' or i["last_usage"] == 'light' or i["last_usage"] == 'window' or i["last_usage"] == 'windowFrench' or i["last_usage"] == 'belmDoor':
-                # print('{} {}'.format(i["id_endpoint"],i["name"]))
+                print('{} {}'.format(i["id_endpoint"],i["name"]))
                 # device_name[i["id_endpoint"]] = i["name"]
                 device_name[i["id_device"]] = i["name"]
                 device_type[i["id_device"]] = i["last_usage"]
                 device_endpoint[i["id_device"]] = i["id_endpoint"]
 
             if i["last_usage"] == 'boiler' or i["last_usage"] == 'conso':
-                # print('{} {}'.format(i["id_endpoint"],i["name"]))
+                print('{} {}'.format(i["id_endpoint"],i["name"]))
                 device_name[i["id_endpoint"]] = i["name"]
                 device_type[i["id_endpoint"]] = i["last_usage"]
                 device_endpoint[i["id_device"]] = i["id_endpoint"]
 
             if i["last_usage"] == 'alarm':
-                # print('{} {}'.format(i["id_endpoint"], i["name"]))
+                print('{} {}'.format(i["id_endpoint"], i["name"]))
                 device_name[i["id_endpoint"]] = "Tyxal Alarm"
                 device_type[i["id_device"]] = 'alarm'
                 device_endpoint[i["id_device"]] = i["id_endpoint"]
