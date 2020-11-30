@@ -42,7 +42,7 @@ class ElectricalConsumptionSensor:
         self.setup()
 
         try:
-            await
+            await self.update_sensors()
             self.update_sensors()
         except Exception as e:
             print("Electrical consumption sensors Error :")
