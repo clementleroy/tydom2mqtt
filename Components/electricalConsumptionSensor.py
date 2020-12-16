@@ -3,6 +3,8 @@ import time
 from datetime import datetime
 from sensors import sensor
 
+sensor_config_topic = "homeassistant/sensor/tydom/{id}/config"
+
 class ElectricalConsumptionSensor:
 
     def __init__(self, tydom_attributes, tydom_client=None, mqtt=None):
@@ -21,7 +23,7 @@ class ElectricalConsumptionSensor:
         self.device['name'] = self.name
         self.device['identifiers'] = self.id
 
-        #self.config_topic = cover_config_topic.format(id=self.id)
+        self.config_topic = sensor_config_topic.format(id=self.id)
         self.config = {}
         self.config['name'] = self.name
         self.config['unique_id'] = self.id
@@ -35,7 +37,6 @@ class ElectricalConsumptionSensor:
             self.mqtt.mqtt_client.publish(self.config_topic, json.dumps(self.config), qos=0)
         # setup_pub = '(self.config_topic, json.dumps(self.config), qos=0)'
         # return(setup_pub)
-
 
     async def update(self):
         await self.setup()

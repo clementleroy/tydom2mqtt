@@ -6,18 +6,17 @@ import sys
 from datetime import datetime
 from gmqtt import Client as MQTTClient
 
-from cover import Cover
-from alarm_control_panel import Alarm
+from Components.cover import Cover
+from Components.alarm_control_panel import Alarm
 
 # Globals
 ####################################### MQTT
-from light import Light
-from boiler import Boiler
+from Components.light import Light
+from Components.boiler import Boiler
 
 tydom_topic = "+/tydom/#"
 refresh_topic = "homeassistant/requests/tydom/refresh"
 hostname = socket.gethostname()
-
 
 # STOP = asyncio.Event()
 class MQTT_Hassio():
@@ -222,5 +221,3 @@ class MQTT_Hassio():
             client.publish('homeassistant/sensor/tydom/last_clean_startup', pyld, qos=1, retain=True)
         except Exception as e:
             print("on subscribe error : ", e)
-
-

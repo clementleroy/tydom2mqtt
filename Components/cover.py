@@ -9,7 +9,6 @@ cover_position_topic = "cover/tydom/{id}/current_position"
 cover_set_postion_topic = "cover/tydom/{id}/set_position"
 cover_attributes_topic = "cover/tydom/{id}/attributes"
 
-
 class Cover:
     def __init__(self, tydom_attributes, set_position=None, mqtt=None):
         
