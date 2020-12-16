@@ -1,7 +1,7 @@
 import json
 import time
 from datetime import datetime
-from sensors import sensor
+from Components.sensors import sensor
 
 cover_command_topic = "cover/tydom/{id}/set_positionCmd"
 cover_config_topic = "homeassistant/cover/tydom/{id}/config"

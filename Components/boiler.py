@@ -1,7 +1,7 @@
 import json
 import time
 from datetime import datetime
-from sensors import sensor
+from Components.sensors import sensor
 
 climate_config_topic = "homeassistant/climate/tydom/{id}/config"
 sensor_config_topic = "homeassistant/sensor/tydom/{id}/config"
