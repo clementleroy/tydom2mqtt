@@ -98,6 +98,7 @@ class Boiler:
         #            self.config['hold_command_topic'] = hold_command_topic.format(id=self.id)
 
         self.config['unique_id'] = self.id
+        self.config['temp_step'] = 0.5
         print("----- BOILER SETUP ----")
         print(json.dumps(self.config))
         if (self.mqtt != None):
