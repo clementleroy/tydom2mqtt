@@ -98,7 +98,8 @@ class Boiler:
         #            self.config['hold_command_topic'] = hold_command_topic.format(id=self.id)
 
         self.config['unique_id'] = self.id
-
+        print("----- BOILER SETUP ----")
+        print(json.dumps(self.config))
         if (self.mqtt != None):
             self.mqtt.mqtt_client.publish(self.config_topic, json.dumps(self.config), qos=0)
 
@@ -106,19 +107,19 @@ class Boiler:
         await self.setup()
 
         if (self.mqtt != None):
+            print("----- BOILER UPDATE ----")
+            print("attributes")
+            print(json.dumps(self.attributes))
+            print("config")
+            print(json.dumps(self.config))
             if 'temperature' in self.attributes:
                 self.mqtt.mqtt_client.publish(self.config['current_temperature_topic'],
                                               '0' if self.attributes['temperature'] == 'None' else self.attributes[
                                                   'temperature'], qos=0)
             if 'setpoint' in self.attributes:
-                #                self.mqtt.mqtt_client.publish(self.config['temperature_command_topic'], self.attributes['setpoint'], qos=0)
                 self.mqtt.mqtt_client.publish(self.config['temperature_state_topic'],
                                               '10' if self.attributes['setpoint'] == 'None' else self.attributes[
                                                   'setpoint'], qos=0)
-            #            if 'hvacMode' in self.attributes:
-            #                self.mqtt.mqtt_client.publish(self.config['mode_state_topic'], "heat" if self.attributes['hvacMode'] == "NORMAL" else "off", qos=0)
-            #            if 'authorization' in self.attributes:
-            #                self.mqtt.mqtt_client.publish(self.config['mode_state_topic'], "off" if self.attributes['authorization'] == "STOP" else "heat", qos=0)
             if 'thermicLevel' in self.attributes:
                 self.mqtt.mqtt_client.publish(self.config['mode_state_topic'],
                                               "off" if self.attributes['thermicLevel'] == "STOP" else "heat", qos=0)
@@ -139,7 +140,7 @@ class Boiler:
             await tydom_client.put_devices_data(device_id, boiler_id, 'thermicLevel', 'STOP')
         else:
             await tydom_client.put_devices_data(device_id, boiler_id, 'thermicLevel', 'COMFORT')
-            await tydom_client.put_devices_data(device_id, boiler_id, 'setpoint', '10')
+            await tydom_client.put_devices_data(device_id, boiler_id, 'setpoint', '20')
 
     async def put_thermicLevel(tydom_client, device_id, boiler_id, set_thermicLevel):
         print(boiler_id, 'thermicLevel', set_thermicLevel)
