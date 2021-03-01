@@ -11,6 +11,7 @@ import urllib3
 from io import BytesIO
 import json
 import sys
+import logging
 
 _LOGGER = logging.getLogger(__name__)
 
