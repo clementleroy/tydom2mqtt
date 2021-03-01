@@ -13,9 +13,6 @@ from datetime import datetime
 import subprocess, platform
 
 # Thanks https://stackoverflow.com/questions/49878953/issues-listening-incoming-messages-in-websocket-client-on-python-3-6
-
-
-
 class TydomWebSocketClient():
 
     def __init__(self, mac, password, alarm_pin=None, host='mediation.tydom.com'):
@@ -63,7 +60,7 @@ class TydomWebSocketClient():
             self.cmd_prefix = "\x02"
             self.ping_timeout = 40
 
-            
+
         else:
             print('Setting local mode context.')
             self.remote_mode = False
@@ -71,23 +68,20 @@ class TydomWebSocketClient():
             self.cmd_prefix = ""
             self.ping_timeout = None
 
-
     async def connect(self):
 
         print('""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""')
         print('TYDOM WEBSOCKET CONNECTION INITIALISING....                     ')
 
-    
-        
         print('Building headers, getting 1st handshake and authentication....')
 
-        httpHeaders =  {"Connection": "Upgrade",
-                        "Upgrade": "websocket",
-                        "Host": self.host + ":443",
-                        "Accept": "*/*",
-                        "Sec-WebSocket-Key": self.generate_random_key(),
-                        "Sec-WebSocket-Version": "13"
-                        }
+        httpHeaders = {"Connection": "Upgrade",
+                       "Upgrade": "websocket",
+                       "Host": self.host + ":443",
+                       "Accept": "*/*",
+                       "Sec-WebSocket-Key": self.generate_random_key(),
+                       "Sec-WebSocket-Version": "13"
+                       }
         conn = http.client.HTTPSConnection(self.host, 443, context=self.ssl_context)
 
         # Get first handshake
@@ -107,23 +101,24 @@ class TydomWebSocketClient():
         if self.ssl_context is not None:
             websocket_ssl_context = self.ssl_context
         else:
-            websocket_ssl_context = True # Verify certificate
-            
-    # outer loop restarted every time the connection fails
+            websocket_ssl_context = True  # Verify certificate
+
+        # outer loop restarted every time the connection fails
         print('Attempting websocket connection with tydom hub.......................')
         print('Host Target :')
-        print(self.host)                
+        print(self.host)
         '''
             Connecting to webSocket server
             websockets.client.connect returns a WebSocketClientProtocol, which is used to send and receive messages
         '''
-        self.connection = await websockets.client.connect('wss://{}:443/mediation/client?mac={}&appli=1'.format(self.host, self.mac),
-                                                            extra_headers=websocketHeaders, ssl=websocket_ssl_context, ping_timeout=None)
-       
+        self.connection = await websockets.client.connect(
+            'wss://{}:443/mediation/client?mac={}&appli=1'.format(self.host, self.mac),
+            extra_headers=websocketHeaders, ssl=websocket_ssl_context, ping_timeout=None)
+
         return self.connection
 
-############ Utils
- 
+    ############ Utils
+
     # Generate 16 bytes random key for Sec-WebSocket-Keyand convert it to base64
     def generate_random_key(self):
         return base64.b64encode(os.urandom(16))
@@ -138,7 +133,8 @@ class TydomWebSocketClient():
         digestAuth._thread_local.chal = chal
         digestAuth._thread_local.last_nonce = nonce
         digestAuth._thread_local.nonce_count = 1
-        return digestAuth.build_digest_header('GET', "https://{}:443/mediation/client?mac={}&appli=1".format(self.host, self.mac))
+        return digestAuth.build_digest_header('GET', "https://{}:443/mediation/client?mac={}&appli=1".format(self.host,
+                                                                                                             self.mac))
 
     async def notify_alive(self, msg='OK'):
         # print('Connection Still Alive !')
@@ -151,8 +147,6 @@ class TydomWebSocketClient():
         #     n.notify("WATCHDOG=1")
         #     # print("Tydom HUB is still connected, systemd's watchdog notified...")
 
-
-
     ###############################################################
     # Commands                                                    #
     ###############################################################
@@ -161,7 +155,7 @@ class TydomWebSocketClient():
     async def send_message(self, method, msg):
         # print(method, msg)
 
-        str = self.cmd_prefix + method +' ' + msg +" HTTP/1.1\r\nContent-Length: 0\r\nContent-Type: application/json; charset=UTF-8\r\nTransac-Id: 0\r\n\r\n"
+        str = self.cmd_prefix + method + ' ' + msg + " HTTP/1.1\r\nContent-Length: 0\r\nContent-Type: application/json; charset=UTF-8\r\nTransac-Id: 0\r\n\r\n"
         a_bytes = bytes(str, "ascii")
         if not 'pwd' in msg:
             print('>>>>>>>>>> Sending to tydom client.....', method, msg)
@@ -176,9 +170,11 @@ class TydomWebSocketClient():
     async def put_devices_data(self, device_id, endpoint_id, name, value):
 
         # For shutter, value is the percentage of closing
-        body="[{\"name\":\"" + name + "\",\"value\":\""+ value + "\"}]"
+        body = "[{\"name\":\"" + name + "\",\"value\":\"" + value + "\"}]"
         # endpoint_id is the endpoint = the device (shutter in this case) to open.
-        str_request = self.cmd_prefix + "PUT /devices/{}/endpoints/{}/data HTTP/1.1\r\nContent-Length: ".format(str(device_id),str(endpoint_id))+str(len(body))+"\r\nContent-Type: application/json; charset=UTF-8\r\nTransac-Id: 0\r\n\r\n"+body+"\r\n\r\n"
+        str_request = self.cmd_prefix + "PUT /devices/{}/endpoints/{}/data HTTP/1.1\r\nContent-Length: ".format(
+            str(device_id), str(endpoint_id)) + str(len(
+            body)) + "\r\nContent-Type: application/json; charset=UTF-8\r\nTransac-Id: 0\r\n\r\n" + body + "\r\n\r\n"
         a_bytes = bytes(str_request, "ascii")
         # print(a_bytes)
         print('Sending to tydom client.....', 'PUT data', body)
@@ -207,15 +203,18 @@ class TydomWebSocketClient():
 
             if zone_id == None:
                 Cmd = 'alarmCmd'
-                body="{\"value\":\"" + str(value) + "\",\"pwd\":\""+ str(self.alarm_pin) + "\"}"
+                body = "{\"value\":\"" + str(value) + "\",\"pwd\":\"" + str(self.alarm_pin) + "\"}"
                 # body= {"value":"OFF","pwd":"123456"}
             else:
                 Cmd = 'zoneCmd'
-                body="{\"value\":\"" + str(value) + "\",\"pwd\":\""+ str(self.alarm_pin) + "\",\"zones\":\"["+ str(zone_id) + "]\"}"
+                body = "{\"value\":\"" + str(value) + "\",\"pwd\":\"" + str(self.alarm_pin) + "\",\"zones\":\"[" + str(
+                    zone_id) + "]\"}"
 
             # str_request = self.cmd_prefix + "PUT /devices/{}/endpoints/{}/cdata?name={},".format(str(alarm_id),str(alarm_id),str(cmd)) + body +");"
-            str_request = self.cmd_prefix + "PUT /devices/{}/endpoints/{}/cdata?name={} HTTP/1.1\r\nContent-Length: ".format(str(device_id),str(alarm_id),str(Cmd))+str(len(body))+"\r\nContent-Type: application/json; charset=UTF-8\r\nTransac-Id: 0\r\n\r\n"+body+"\r\n\r\n"
-            
+            str_request = self.cmd_prefix + "PUT /devices/{}/endpoints/{}/cdata?name={} HTTP/1.1\r\nContent-Length: ".format(
+                str(device_id), str(alarm_id), str(Cmd)) + str(len(
+                body)) + "\r\nContent-Type: application/json; charset=UTF-8\r\nTransac-Id: 0\r\n\r\n" + body + "\r\n\r\n"
+
             a_bytes = bytes(str_request, "ascii")
             # print(a_bytes)
             print('Sending to tydom client.....', 'PUT cdata', body)
@@ -227,7 +226,6 @@ class TydomWebSocketClient():
             print(e)
             print(a_bytes)
 
-            
     # Get some information on Tydom
     async def get_info(self):
         msg_type = '/info'
@@ -254,7 +252,6 @@ class TydomWebSocketClient():
         req = 'GET'
         await self.send_message(method=req, msg=msg_type)
 
-
     # Get a ping (pong should be returned)
     async def get_ping(self):
         msg_type = '/ping'
@@ -262,20 +259,17 @@ class TydomWebSocketClient():
         await self.send_message(method=req, msg=msg_type)
         print('****** ping !')
 
-
     # Get all devices metadata
     async def get_devices_meta(self):
         msg_type = '/devices/meta'
         req = 'GET'
         await self.send_message(method=req, msg=msg_type)
 
-
     # Get all devices data
     async def get_devices_data(self):
         msg_type = '/devices/data'
         req = 'GET'
         await self.send_message(method=req, msg=msg_type)
-
 
     # List the device to get the endpoint id
     async def get_configs_file(self):
@@ -291,12 +285,12 @@ class TydomWebSocketClient():
     # Give order to endpoint
     async def get_device_data(self, id):
         # 10 here is the endpoint = the device (shutter in this case) to open.
-        str_request = self.cmd_prefix + "GET /devices/{}/endpoints/{}/data HTTP/1.1\r\nContent-Length: 0\r\nContent-Type: application/json; charset=UTF-8\r\nTransac-Id: 0\r\n\r\n".format(str(id),str(id))
+        str_request = self.cmd_prefix + "GET /devices/{}/endpoints/{}/data HTTP/1.1\r\nContent-Length: 0\r\nContent-Type: application/json; charset=UTF-8\r\nTransac-Id: 0\r\n\r\n".format(
+            str(id), str(id))
         a_bytes = bytes(str_request, "ascii")
         await self.connection.send(a_bytes)
         # name = await self.recv()
         # parse_response(name)
-
 
     async def setup(self):
         '''

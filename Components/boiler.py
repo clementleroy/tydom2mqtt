@@ -16,7 +16,6 @@ hold_state_topic = "climate/tydom/{id}/thermicLevel"
 hold_command_topic = "climate/tydom/{id}/set_thermicLevel"
 out_temperature_state_topic = "sensor/tydom/{id}/temperature"
 
-
 # temperature = current_temperature_topic
 # setpoint= temperature_command_topic
 # temperature_unit=C
@@ -99,8 +98,7 @@ class Boiler:
 
         self.config['unique_id'] = self.id
         self.config['temp_step'] = 0.5
-        print("----- BOILER SETUP ----")
-        print(json.dumps(self.config))
+
         if (self.mqtt != None):
             self.mqtt.mqtt_client.publish(self.config_topic, json.dumps(self.config), qos=0)
 
@@ -108,19 +106,19 @@ class Boiler:
         await self.setup()
 
         if (self.mqtt != None):
-            print("----- BOILER UPDATE ----")
-            print("attributes")
-            print(json.dumps(self.attributes))
-            print("config")
-            print(json.dumps(self.config))
             if 'temperature' in self.attributes:
                 self.mqtt.mqtt_client.publish(self.config['current_temperature_topic'],
                                               '0' if self.attributes['temperature'] == 'None' else self.attributes[
                                                   'temperature'], qos=0)
             if 'setpoint' in self.attributes:
+                #                self.mqtt.mqtt_client.publish(self.config['temperature_command_topic'], self.attributes['setpoint'], qos=0)
                 self.mqtt.mqtt_client.publish(self.config['temperature_state_topic'],
                                               '10' if self.attributes['setpoint'] == 'None' else self.attributes[
                                                   'setpoint'], qos=0)
+            #            if 'hvacMode' in self.attributes:
+            #                self.mqtt.mqtt_client.publish(self.config['mode_state_topic'], "heat" if self.attributes['hvacMode'] == "NORMAL" else "off", qos=0)
+            #            if 'authorization' in self.attributes:
+            #                self.mqtt.mqtt_client.publish(self.config['mode_state_topic'], "off" if self.attributes['authorization'] == "STOP" else "heat", qos=0)
             if 'thermicLevel' in self.attributes:
                 self.mqtt.mqtt_client.publish(self.config['mode_state_topic'],
                                               "off" if self.attributes['thermicLevel'] == "STOP" else "heat", qos=0)
@@ -128,7 +126,7 @@ class Boiler:
             if 'outTemperature' in self.attributes:
                 self.mqtt.mqtt_client.publish(self.config['state_topic'], self.attributes['outTemperature'], qos=0)
 
-        # print("Boiler created / updated : ", self.name, self.id, self.current_position)       
+        # print("Boiler created / updated : ", self.name, self.id, self.current_position)
 
     async def put_temperature(tydom_client, device_id, boiler_id, set_setpoint):
         print(boiler_id, 'set_setpoint', set_setpoint)

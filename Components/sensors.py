@@ -10,6 +10,7 @@ binary_sensor_topic = "binary_sensor/tydom/#"
 binary_sensor_config_topic = "homeassistant/binary_sensor/tydom/{id}/config"
 binary_sensor_json_attributes_topic = "binary_sensor/tydom/{id}/state"
 
+
 # sensor_json_attributes_topic = "sensor/tydom/{id}/state"
 # State topic can be the same as the original device attributes topic !
 class sensor:
@@ -26,12 +27,10 @@ class sensor:
 
         # self.json_attributes_topic = attributes_topic_from_device #State extracted from json, but it will make sensor not in payload to be considerd offline....
         self.parent_device_id = str(tydom_attributes_payload['id'])
-        self.id = elem_name+'_tydom_'+str(tydom_attributes_payload['id'])
-        self.name = elem_name+'_tydom_'+'_'+str(tydom_attributes_payload['name']).replace(" ", "_")
-        
-        self.mqtt = mqtt
- 
+        self.id = elem_name + '_tydom_' + str(tydom_attributes_payload['id'])
+        self.name = elem_name + '_tydom_' + '_' + str(tydom_attributes_payload['name']).replace(" ", "_")
 
+        self.mqtt = mqtt
 
         self.binary = False
         # self.device_class = None
@@ -51,8 +50,6 @@ class sensor:
             self.config_topic = sensor_config_topic.format(id=self.id)
             # if 'emperature' in self.elem_name:
             #     self.device_class = 'temperature'
-       
-
 
     # SENSOR:
     # None: Generic sensor. This is the default and doesn’t need to be set.
@@ -63,7 +60,7 @@ class sensor:
     # temperature: Temperature in °C or °F.
     # power: Power in W or kW.
     # pressure: Pressure in hPa or mbar.
-    # timestamp: Datetime object or timestamp string.        
+    # timestamp: Datetime object or timestamp string.
     # BINARY :
     # None: Generic on/off. This is the default and doesn’t need to be set.
     # battery: on means low, off means normal
@@ -95,7 +92,7 @@ class sensor:
         self.device['manufacturer'] = 'Delta Dore'
         self.device['model'] = 'Sensor'
         self.device['name'] = self.name
-        self.device['identifiers'] = self.parent_device_id +'_sensors'
+        self.device['identifiers'] = self.parent_device_id + '_sensors'
 
         self.config_sensor_topic = sensor_config_topic.format(id=self.id)
 
@@ -103,7 +100,7 @@ class sensor:
         self.config['name'] = self.name
         self.config['unique_id'] = self.id
         # self.config['device_class'] = self.device_class
-        
+
         #
         # self.config['value_template'] = "{{ value_json."+self.elem_name+" }}"
         # self.config['attributes'] = self.attributes
@@ -117,24 +114,26 @@ class sensor:
         self.config['state_topic'] = self.json_attributes_topic
 
         if (self.mqtt != None):
-            self.mqtt.mqtt_client.publish((self.config_topic).lower(), json.dumps(self.config), qos=0, retain=True) #sensor Config
+            self.mqtt.mqtt_client.publish((self.config_topic).lower(), json.dumps(self.config), qos=0,
+                                          retain=True)  # sensor Config
 
         # print("CONFIG : ",(self.config_topic).lower(), json.dumps(self.config))
+
     async def update(self):
 
         # 3 items are necessary :
-            # config to config config_sensor_topic + config payload is the schema
-            # state payload to state topic in config with all attributes
+        # config to config config_sensor_topic + config payload is the schema
+        # state payload to state topic in config with all attributes
 
         if 'name' in self.elem_name or 'device_type' in self.elem_name or self.elem_value == None:
-            pass #OOOOOOOOOH that's quick and dirty
+            pass  # OOOOOOOOOH that's quick and dirty
         else:
-            await self.setup() #Publish config
-            #Publish state json to state topic
+            await self.setup()  # Publish config
+            # Publish state json to state topic
             if (self.mqtt != None):
                 # print(self.json_attributes_topic, self.attributes)
                 # self.mqtt.mqtt_client.publish(self.json_attributes_topic, self.attributes, qos=0) #sensor json State
-                self.mqtt.mqtt_client.publish(self.json_attributes_topic, self.elem_value, qos=0) #sensor State
+                self.mqtt.mqtt_client.publish(self.json_attributes_topic, self.elem_value, qos=0)  # sensor State
             if self.binary == False:
                 print("Sensor created / updated : ", self.name, self.elem_value)
             else:
